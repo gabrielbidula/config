@@ -70,7 +70,12 @@ vim.opt.relativenumber = true
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
--- Diagnostic keymaps
+-- [[ Diagnostic ]]
+vim.diagnostic.config {
+  float = {
+    border = 'rounded',
+  },
+}
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic error messages' })
@@ -163,9 +168,6 @@ require('lazy').setup({
           floats = 'transparent',
         },
       }
-    end,
-    init = function()
-      vim.cmd [[colorscheme solarized-osaka]]
     end,
   },
 
@@ -420,6 +422,8 @@ require('lazy').setup({
       { 'j-hui/fidget.nvim', opts = {} },
     },
     config = function()
+      require('lspconfig.ui.windows').default_options.border = 'single'
+
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
@@ -459,7 +463,7 @@ require('lazy').setup({
       local servers = {
         gopls = {},
         yamlls = {},
-        tsserver = {},
+        ts_ls = {},
         intelephense = {
           licenceKey = '~/intelephense/licence.txt',
         },
@@ -494,6 +498,9 @@ require('lazy').setup({
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
+
+            -- https://github.com/neovim/nvim-lspconfig/pull/3232
+            server_name = server_name == 'tsserver' and 'ts_ls' or server_name
 
             server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
             require('lspconfig')[server_name].setup(server)
@@ -816,3 +823,6 @@ require('lazy').setup({
     },
   },
 })
+
+-- set the colorscheme
+vim.cmd [[colorscheme kanagawa-dragon]]
