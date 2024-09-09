@@ -46,13 +46,13 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 
 -- Sets how neovim will display certain whitespace in the editor.
-vim.opt.list = false
-vim.opt.listchars = {
-  tab = '» ',
-  trail = '·',
-  nbsp = '␣',
-  --[[eol = '↲']]
-}
+-- vim.opt.list = false
+-- vim.opt.listchars = {
+--   tab = '» ',
+--   trail = '·',
+--   nbsp = '␣',
+--   [[eol = '↲']]
+-- }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -157,18 +157,23 @@ require('lazy').setup({
   },
 
   {
+    'neanias/everforest-nvim',
+    version = false,
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require('everforest').setup {
+        background = 'dark',
+        italics = true,
+      }
+    end,
+  },
+
+  {
     'craftzdog/solarized-osaka.nvim',
     lazy = false,
     priority = 1000,
-    opts = function()
-      return {
-        transparent = true,
-        styles = {
-          sidebars = 'transparent',
-          floats = 'transparent',
-        },
-      }
-    end,
+    opts = {},
   },
 
   {
@@ -182,10 +187,12 @@ require('lazy').setup({
     'catppuccin/nvim',
     name = 'catppuccin',
   },
+
   {
     'rose-pine/neovim',
     name = 'rose-pine',
   },
+
   {
     'rebelot/kanagawa.nvim',
   },
@@ -328,7 +335,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = 'Search current word' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = 'Search by grep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = 'Search diagnostics' })
-      vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = 'Search resume' })
+      -- vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = 'Search resume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = 'Search recent files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = 'Find existing buffers' })
 
@@ -679,6 +686,131 @@ require('lazy').setup({
     },
   },
 
+  {
+    'echasnovski/mini.indentscope',
+    version = false, -- wait till new 0.7.0 release to put it back on semver
+    event = 'VeryLazy',
+    opts = {
+      -- symbol = "▏",
+      symbol = '│',
+      options = { try_as_border = true },
+    },
+    init = function()
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = {
+          'alpha',
+          'dashboard',
+          'fzf',
+          'help',
+          'lazy',
+          'lazyterm',
+          'mason',
+          'neo-tree',
+          'notify',
+          'toggleterm',
+          'Trouble',
+          'trouble',
+        },
+        callback = function()
+          vim.b.miniindentscope_disable = true
+        end,
+      })
+    end,
+  },
+
+  {
+    'lukas-reineke/indent-blankline.nvim',
+    main = 'ibl',
+    ---@module "ibl"
+    ---@type ibl.config
+    opts = {
+      scope = { enabled = false },
+    },
+  },
+
+  {
+    'b0o/incline.nvim',
+    config = function()
+      local devicons = require 'nvim-web-devicons'
+      require('incline').setup {
+        render = function(props)
+          local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ':t')
+          if filename == '' then
+            filename = '[No Name]'
+          end
+          local ft_icon, ft_color = devicons.get_icon_color(filename)
+
+          local function get_git_diff()
+            local icons = { removed = '', changed = '', added = '' }
+            local signs = vim.b[props.buf].gitsigns_status_dict
+            local labels = {}
+            if signs == nil then
+              return labels
+            end
+            for name, icon in pairs(icons) do
+              if tonumber(signs[name]) and signs[name] > 0 then
+                table.insert(labels, { icon .. signs[name] .. ' ', group = 'Diff' .. name })
+              end
+            end
+            if #labels > 0 then
+              table.insert(labels, { '┊ ' })
+            end
+            return labels
+          end
+
+          local function get_diagnostic_label()
+            local icons = { error = '', warn = '', info = '', hint = '' }
+            local label = {}
+
+            for severity, icon in pairs(icons) do
+              local n = #vim.diagnostic.get(props.buf, { severity = vim.diagnostic.severity[string.upper(severity)] })
+              if n > 0 then
+                table.insert(label, { icon .. n .. ' ', group = 'DiagnosticSign' .. severity })
+              end
+            end
+            if #label > 0 then
+              table.insert(label, { '┊ ' })
+            end
+            return label
+          end
+
+          return {
+            { get_diagnostic_label() },
+            { get_git_diff() },
+            { (ft_icon or '') .. ' ', guifg = ft_color, guibg = 'none' },
+            { filename .. ' ', gui = vim.bo[props.buf].modified and 'bold,italic' or 'bold' },
+            { '┊  ' .. vim.api.nvim_win_get_number(props.win), group = 'DevIconWindows' },
+          }
+        end,
+      }
+    end,
+    -- Optional: Lazy load Incline
+    event = 'VeryLazy',
+  },
+
+  {
+    'MagicDuck/grug-far.nvim',
+    opts = { headerMaxWidth = 80 },
+    cmd = 'GrugFar',
+    keys = {
+      {
+        '<leader>sr',
+        function()
+          local grug = require 'grug-far'
+          local ext = vim.bo.buftype == '' and vim.fn.expand '%:e'
+          grug.grug_far {
+            transient = true,
+            prefills = {
+              filesFilter = ext and ext ~= '' and '*.' .. ext or nil,
+            },
+          }
+        end,
+        mode = { 'n', 'v' },
+        desc = 'Search and Replace',
+      },
+    },
+  },
+
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
@@ -776,7 +908,7 @@ require('lazy').setup({
     dependencies = { 'nvim-tree/nvim-web-devicons' },
     opts = {
       options = {
-        theme = 'auto',
+        theme = '16color',
       },
     },
   },
@@ -825,4 +957,4 @@ require('lazy').setup({
 })
 
 -- set the colorscheme
-vim.cmd [[colorscheme kanagawa-dragon]]
+vim.cmd [[colorscheme solarized-osaka]]

@@ -1178,7 +1178,7 @@ font_size 15.0
 
 #: The foreground and background colors.
 
-background_opacity 0.95
+background_opacity 1
 
 #: The opacity of the background. A number between zero and one, where
 #: one is opaque and zero is fully transparent. This will only work if
@@ -1203,7 +1203,7 @@ background_opacity 0.95
 #: will only work if dynamic_background_opacity was enabled in the
 #: original config.
 
-background_blur 64
+#background_blur 64
 
 #: Set to a positive value to enable background blur (blurring of the
 #: visuals behind a transparent window) on platforms that support it.
@@ -2593,13 +2593,13 @@ background_blur 64
 
 
 # BEGIN_KITTY_THEME
-# Solarized Dark - Patched
+# Default
 include current-theme.conf
 # END_KITTY_THEME
 
 
 # BEGIN_KITTY_FONTS
-font_family      family=Menlo postscript_name=Menlo-Regular
+font_family      family="JetBrainsMono Nerd Font Mono"
 bold_font        auto
 italic_font      auto
 bold_italic_font auto
