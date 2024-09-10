@@ -197,6 +197,67 @@ require('lazy').setup({
     'rebelot/kanagawa.nvim',
   },
 
+  {
+    'folke/trouble.nvim',
+    opts = {},
+    cmd = 'Trouble',
+    keys = {
+      {
+        '<leader>dx',
+        '<cmd>Trouble diagnostics toggle<cr>',
+        desc = 'Diagnostics (Trouble)',
+      },
+      {
+        '<leader>dX',
+        '<cmd>Trouble diagnostics toggle filter.buf=0<cr>',
+        desc = 'Buffer Diagnostics (Trouble)',
+      },
+      {
+        '<leader>ds',
+        '<cmd>Trouble symbols toggle focus=false<cr>',
+        desc = 'Symbols (Trouble)',
+      },
+      {
+        '<leader>dl',
+        '<cmd>Trouble lsp toggle focus=false win.position=right<cr>',
+        desc = 'LSP Definitions / references / ... (Trouble)',
+      },
+      {
+        '<leader>dL',
+        '<cmd>Trouble loclist toggle<cr>',
+        desc = 'Location List (Trouble)',
+      },
+      {
+        '<leader>dQ',
+        '<cmd>Trouble qflist toggle<cr>',
+        desc = 'Quickfix List (Trouble)',
+      },
+    },
+  },
+
+  { -- search/replace in multiple files
+    'MagicDuck/grug-far.nvim',
+    opts = { headerMaxWidth = 80 },
+    cmd = 'GrugFar',
+    keys = {
+      {
+        '<leader>sr',
+        function()
+          local grug = require 'grug-far'
+          local ext = vim.bo.buftype == '' and vim.fn.expand '%:e'
+          grug.grug_far {
+            transient = true,
+            prefills = {
+              filesFilter = ext and ext ~= '' and '*.' .. ext or nil,
+            },
+          }
+        end,
+        mode = { 'n', 'v' },
+        desc = 'Search and Replace',
+      },
+    },
+  },
+
   -- lazy.nvim
   {
     'folke/noice.nvim',
@@ -220,6 +281,40 @@ require('lazy').setup({
         mode = 'tabs',
         show_buffer_close_icons = false,
         show_close_icon = false,
+      },
+    },
+  },
+
+  {
+    'folke/which-key.nvim',
+    event = 'VeryLazy',
+    opts_extend = { 'spec' },
+    opts = {
+      defaults = {},
+      spec = {
+        mode = { 'n', 'v' },
+        { '<leader>s', desc = 'Search' },
+        { '<leader>c', desc = 'LSP: Code Actions' },
+        { '<leader>g', desc = 'Git' },
+        { '<leader>h', desc = 'Harpoon' },
+        { '<leader>r', desc = 'LSP: Rename' },
+        { '<leader>t', desc = 'Test' },
+        { '<leader>d', desc = 'Diagnostics using Trouble' },
+        { '<leader>w', desc = 'LSP: Workspace Symbols' },
+      },
+
+      icons = {
+        mappings = false,
+        ruler = false,
+      },
+    },
+    keys = {
+      {
+        '<leader>?',
+        function()
+          require('which-key').show { global = false }
+        end,
+        desc = 'Buffer Local Keymaps (which-key)',
       },
     },
   },
@@ -335,7 +430,6 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = 'Search current word' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = 'Search by grep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = 'Search diagnostics' })
-      -- vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = 'Search resume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = 'Search recent files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = 'Find existing buffers' })
 
@@ -442,7 +536,6 @@ require('lazy').setup({
           map('gr', require('telescope.builtin').lsp_references, 'Goto references')
           map('gI', require('telescope.builtin').lsp_implementations, 'Goto implementation')
           map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type definition')
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, 'Document symbols')
           map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Workspace symbols')
           map('<leader>rn', vim.lsp.buf.rename, 'Rename')
           map('<leader>ca', vim.lsp.buf.code_action, 'Code action')
@@ -539,6 +632,7 @@ require('lazy').setup({
       },
       'saadparwaiz1/cmp_luasnip',
       'hrsh7th/cmp-nvim-lsp',
+      'hrsh7th/cmp-buffer',
       'hrsh7th/cmp-path',
     },
     config = function()
@@ -587,6 +681,7 @@ require('lazy').setup({
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
+          { name = 'buffer' },
         },
       }
     end,
@@ -759,7 +854,7 @@ require('lazy').setup({
           end
 
           local function get_diagnostic_label()
-            local icons = { error = '', warn = '', info = '', hint = '' }
+            local icons = { error = ' ', warn = ' ', info = ' ', hint = ' ' }
             local label = {}
 
             for severity, icon in pairs(icons) do
@@ -788,29 +883,6 @@ require('lazy').setup({
     event = 'VeryLazy',
   },
 
-  {
-    'MagicDuck/grug-far.nvim',
-    opts = { headerMaxWidth = 80 },
-    cmd = 'GrugFar',
-    keys = {
-      {
-        '<leader>sr',
-        function()
-          local grug = require 'grug-far'
-          local ext = vim.bo.buftype == '' and vim.fn.expand '%:e'
-          grug.grug_far {
-            transient = true,
-            prefills = {
-              filesFilter = ext and ext ~= '' and '*.' .. ext or nil,
-            },
-          }
-        end,
-        mode = { 'n', 'v' },
-        desc = 'Search and Replace',
-      },
-    },
-  },
-
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
@@ -819,74 +891,6 @@ require('lazy').setup({
       require('mini.pairs').setup()
       require('mini.comment').setup()
       require('mini.files').setup()
-
-      local miniclue = require 'mini.clue'
-      miniclue.setup {
-        triggers = {
-          -- Leader triggers
-          { mode = 'n', keys = '<Leader>' },
-          { mode = 'x', keys = '<Leader>' },
-
-          -- Built-in completion
-          { mode = 'i', keys = '<C-x' },
-
-          -- `g` key
-          { mode = 'n', keys = 'g' },
-          { mode = 'x', keys = 'g' },
-
-          -- Marks
-          { mode = 'n', keys = "'" },
-          { mode = 'n', keys = '`' },
-          { mode = 'x', keys = "'" },
-          { mode = 'x', keys = '`' },
-
-          -- Registers
-          { mode = 'n', keys = '"' },
-          { mode = 'x', keys = '"' },
-          { mode = 'i', keys = '<C-r>' },
-          { mode = 'c', keys = '<C-r>' },
-
-          -- Window commands
-          { mode = 'n', keys = '<C-w>' },
-
-          -- `z` key
-          { mode = 'n', keys = 'z' },
-          { mode = 'x', keys = 'z' },
-        },
-
-        clues = {
-          miniclue.gen_clues.builtin_completion(),
-          miniclue.gen_clues.g(),
-          miniclue.gen_clues.marks(),
-          miniclue.gen_clues.registers(),
-          miniclue.gen_clues.windows(),
-          miniclue.gen_clues.z(),
-
-          { mode = 'n', keys = '<Leader>s', desc = 'Search' },
-          { mode = 'n', keys = '<Leader>h', desc = 'Harpoon' },
-          { mode = 'n', keys = '<Leader>t', desc = 'Test' },
-          { mode = 'n', keys = '<Leader>g', desc = 'Git' },
-          { mode = 'n', keys = '<Leader>c', desc = 'Code Action' },
-          { mode = 'n', keys = '<Leader>w', desc = 'Workspace' },
-          { mode = 'n', keys = '<Leader>d', desc = 'Document' },
-        },
-
-        -- Clue window settings
-        window = {
-          -- Floating window config
-          config = {
-            width = 'auto',
-            border = 'double',
-          },
-
-          -- Delay before showing clue window
-          delay = 200,
-
-          -- Keys to scroll inside the clue window
-          scroll_down = '<C-d>',
-          scroll_up = '<C-u>',
-        },
-      }
 
       local hipatterns = require 'mini.hipatterns'
       hipatterns.setup {
@@ -908,7 +912,7 @@ require('lazy').setup({
     dependencies = { 'nvim-tree/nvim-web-devicons' },
     opts = {
       options = {
-        theme = '16color',
+        theme = 'solarized_dark',
       },
     },
   },
