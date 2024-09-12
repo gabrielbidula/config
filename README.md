@@ -1,18 +1,21 @@
-![Neofetch sample](images/neofetch.png)
+![Neofetch](images/neofetch.png)
 
-![Init.lua sample1](images/sample1.png)
+![Neovim](images/neovim.png)
 
-![Init.lua sample2](images/sample2.png)
+![Neovim-cmp](images/neovim-cmp.png)
 
-![Init.lua sample3](images/sample3.png)
+![Neovim-lsp-shift-k](images/neovim-lsp-shift-k.png)
 
-![Init.lua sample4](images/sample4.png)
+![Neovim-which-key](images/neovim-which-key.png)
+
+![Lazygit](images/lazygit.png)
 
 # Gabriel's dotfiles
 
 ## Contents
 
-- neovim config
-- tmux config
-- fish config
-- kitty config
+- neovim
+- tmux
+- fish
+- kitty
+- lazygit
