@@ -17,7 +17,7 @@
 - neovim
 - tmux
 - fish
-- kitty
+- iterm2
 - lazygit
 
 ## Shell setup (macOS)
