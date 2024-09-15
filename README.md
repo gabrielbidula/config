@@ -18,5 +18,5 @@
 - [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh) - ZSH Shell framework
 - [Nerd fonts](https://github.com/ryanoasis/nerd-fonts) - Patched fonts for development-use. I use [Hack](https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/Hack).
 - [Fzf](https://github.com/junegunn/fzf) - Fuzzy finder
-- [z](https://github.com/jethrokuan/z) - Directory jumping
+- [z](https://github.com/rupa/z) - Directory jumping
 - [Bat](https://github.com/sharkdp/bat) - A cat clone with wings
