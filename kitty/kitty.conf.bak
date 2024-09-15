@@ -20,7 +20,7 @@
 #: <https://sw.kovidgoyal.net/kitty/kittens/choose-fonts/#font-spec-
 #: syntax>.
 
-font_size 14
+font_size 14.0
 
 #: Font size (in pts).
 
@@ -311,7 +311,7 @@ font_size 14
 
 #: Scrollback {{{
 
- scrollback_lines 60000
+# scrollback_lines 2000
 
 #: Number of lines of history to keep in memory for scrolling back.
 #: Memory is allocated on demand. Negative numbers are (effectively)
@@ -1178,7 +1178,7 @@ font_size 14
 
 #: The foreground and background colors.
 
-#background_opacity 0.8
+background_opacity 1
 
 #: The opacity of the background. A number between zero and one, where
 #: one is opaque and zero is fully transparent. This will only work if
@@ -1886,9 +1886,6 @@ font_size 14
 #:     map kitty_mod+e combine : new_window : next_layout
 #:     # multi-key shortcuts
 #:     map ctrl+x>ctrl+y>z action
-#
-
-map ctrl+f launch --type=overlay --stdin-source=@screen_scrollback /bin/sh -c "/opt/homebrew/bin/fzf --no-sort --no-mouse --exact -i --tac | kitty +kitten clipboard"
 
 #: The full list of actions that can be mapped to key presses is
 #: available here <https://sw.kovidgoyal.net/kitty/actions/>.
@@ -2596,6 +2593,7 @@ map ctrl+f launch --type=overlay --stdin-source=@screen_scrollback /bin/sh -c "/
 
 
 # BEGIN_KITTY_THEME
+# Selenized Black
 include current-theme.conf
 # END_KITTY_THEME
 

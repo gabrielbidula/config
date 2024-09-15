@@ -8,6 +8,9 @@ vim.o.background = 'dark'
 -- Enables 24-bit RGB color
 vim.termguicolors = true
 
+-- Set statusline per neovim instance
+vim.opt.laststatus = 3
+
 -- Set to true if you have a Nerd Font installed
 vim.g.have_nerd_font = true
 
@@ -45,14 +48,9 @@ vim.opt.timeoutlen = 300
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 
--- Sets how neovim will display certain whitespace in the editor.
--- vim.opt.list = false
--- vim.opt.listchars = {
---   tab = '» ',
---   trail = '·',
---   nbsp = '␣',
---   [[eol = '↲']]
--- }
+-- Configure how new splits should be opened
+vim.opt.splitright = true
+vim.opt.splitbelow = true
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -86,10 +84,6 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
--- Neotest keymaps
-vim.keymap.set('n', '<leader>tn', "<cmd>lua require('neotest').run.run()<CR>", { desc = 'Test nearest' })
-vim.keymap.set('n', '<leader>tf', "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<CR>", { desc = 'Test file' })
 
 -- Oil keymaps
 vim.keymap.set('n', '-', '<CMD>Oil<CR>')
@@ -133,68 +127,97 @@ require('lazy').setup({
     end,
   },
 
+  {
+    'yetone/avante.nvim',
+    event = 'VeryLazy',
+    lazy = false,
+    version = false, -- set this if you want to always pull the latest change
+    opts = {
+      -- add any opts here
+    },
+    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
+    build = 'make',
+    -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
+    dependencies = {
+      'stevearc/dressing.nvim',
+      'nvim-lua/plenary.nvim',
+      'MunifTanjim/nui.nvim',
+      --- The below dependencies are optional,
+      'nvim-tree/nvim-web-devicons', -- or echasnovski/mini.icons
+      'zbirenbaum/copilot.lua', -- for providers='copilot'
+      {
+        -- support for image pasting
+        'HakonHarnes/img-clip.nvim',
+        event = 'VeryLazy',
+        opts = {
+          -- recommended settings
+          default = {
+            embed_image_as_base64 = false,
+            prompt_for_file_name = false,
+            drag_and_drop = {
+              insert_mode = true,
+            },
+            -- required for Windows users
+            use_absolute_path = true,
+          },
+        },
+      },
+      {
+        -- Make sure to set this up properly if you have lazy=true
+        'MeanderingProgrammer/render-markdown.nvim',
+        opts = {
+          file_types = { 'markdown', 'Avante' },
+        },
+        ft = { 'markdown', 'Avante' },
+      },
+    },
+  },
+
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
-  { -- Tests
+  {
     'nvim-neotest/neotest',
+    lazy = true,
     dependencies = {
       'nvim-neotest/nvim-nio',
       'nvim-lua/plenary.nvim',
       'antoinemadec/FixCursorHold.nvim',
       'nvim-treesitter/nvim-treesitter',
       'olimorris/neotest-phpunit',
-      'V13Axel/neotest-pest',
     },
     config = function()
       require('neotest').setup {
         adapters = {
-          require 'neotest-pest' {
-            pest_cmd = 'vendor/bin/pest',
+          require 'neotest-phpunit' {
+            phpunit_cmd = function()
+              return 'vendor/bin/phpunit'
+            end,
           },
         },
       }
     end,
-  },
-
-  {
-    'neanias/everforest-nvim',
-    version = false,
-    lazy = false,
-    priority = 1000,
-    config = function()
-      require('everforest').setup {
-        background = 'dark',
-        italics = true,
-      }
-    end,
+    keys = {
+      { '<leader>ta', "<cmd>lua require('neotest').run.run(vim.fn.getcwd())<cr>", desc = 'Test all' },
+      { '<leader>tf', "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", desc = 'Test file' },
+      { '<leader>tn', "<cmd>lua require('neotest').run.run()<cr>", desc = 'Test nearest' },
+      { '<leader>tx', "<cmd>lua require('neotest').run.stop()<cr>", desc = 'Stop test' },
+      { '<leader>tl', "<cmd>lua require('neotest').run.run_last()<cr>", desc = 'Run last test' },
+      { '<leader>td', "<cmd>lua require('neotest').run.run({strategy = 'dap'})<cr>", desc = 'Test debug nearest test' },
+      { '<leader>ts', "<cmd>lua require('neotest').summary.toggle({ enter = true })<cr>", desc = 'Toggle summary' },
+      { '<leader>to', "<cmd>lua require('neotest').output_panel.toggle()<cr>", desc = 'Toggle output panel' },
+    },
   },
 
   {
     'craftzdog/solarized-osaka.nvim',
-    lazy = false,
-    priority = 1000,
-    opts = {},
-  },
-
-  {
-    'folke/tokyonight.nvim',
-    lazy = false,
-    priority = 1000,
-    opts = {},
-  },
-
-  {
-    'catppuccin/nvim',
-    name = 'catppuccin',
-  },
-
-  {
-    'rose-pine/neovim',
-    name = 'rose-pine',
-  },
-
-  {
-    'rebelot/kanagawa.nvim',
+    config = function()
+      require('solarized-osaka').setup {
+        transparent = true,
+        on_highlights = function(highlights, colors)
+          highlights.Visual = { bg = colors.base03, reverse = false } -- Set Visual background color despite any other highlight
+        end,
+      }
+    end,
   },
 
   {
@@ -293,6 +316,7 @@ require('lazy').setup({
       defaults = {},
       spec = {
         mode = { 'n', 'v' },
+        { '<leader>a', desc = 'Avante' },
         { '<leader>s', desc = 'Search' },
         { '<leader>c', desc = 'LSP: Code Actions' },
         { '<leader>g', desc = 'Git' },
@@ -316,6 +340,23 @@ require('lazy').setup({
         end,
         desc = 'Buffer Local Keymaps (which-key)',
       },
+    },
+  },
+
+  { -- LazyGit
+    'kdheepak/lazygit.nvim',
+    cmd = {
+      'LazyGit',
+      'LazyGitConfig',
+      'LazyGitCurrentFile',
+      'LazyGitFilter',
+      'LazyGitFilterCurrentFile',
+    },
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+    keys = {
+      { '<leader>gl', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
     },
   },
 
@@ -883,6 +924,25 @@ require('lazy').setup({
     event = 'VeryLazy',
   },
 
+  { -- Markdown preview
+    'iamcco/markdown-preview.nvim',
+    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+    ft = { 'markdown' },
+    build = function(plugin)
+      if vim.fn.executable 'npx' then
+        vim.cmd('!cd ' .. plugin.dir .. ' && cd app && npx --yes yarn install')
+      else
+        vim.cmd [[Lazy load markdown-preview.nvim]]
+        vim.fn['mkdp#util#install']()
+      end
+    end,
+    init = function()
+      if vim.fn.executable 'npx' then
+        vim.g.mkdp_filetypes = { 'markdown' }
+      end
+    end,
+  },
+
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
@@ -891,6 +951,7 @@ require('lazy').setup({
       require('mini.pairs').setup()
       require('mini.comment').setup()
       require('mini.files').setup()
+      require('mini.statusline').setup()
 
       local hipatterns = require 'mini.hipatterns'
       hipatterns.setup {
@@ -904,17 +965,6 @@ require('lazy').setup({
         },
       }
     end,
-  },
-
-  -- Statusline
-  {
-    'nvim-lualine/lualine.nvim',
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
-    opts = {
-      options = {
-        theme = 'solarized_dark',
-      },
-    },
   },
 
   { -- Highlight, edit, and navigate code
